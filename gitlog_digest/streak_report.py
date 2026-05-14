@@ -35,7 +35,12 @@ def _extract_dates(commits: List[Commit]) -> List[date]:
 
 
 def compute_streak(dates: List[date]) -> tuple[int, int]:
-    """Return (current_streak, longest_streak) given a sorted list of unique dates."""
+    """Return (current_streak, longest_streak) given a sorted list of unique dates.
+
+    A "current streak" is only counted if the author's last active day is
+    today or yesterday (so a streak isn't immediately broken by the clock
+    ticking past midnight).
+    """
     if not dates:
         return 0, 0
 
@@ -82,6 +87,20 @@ def build_streak_report(commits: List[Commit]) -> Dict[str, StreakInfo]:
             active_days=dates,
         )
     return report
+
+
+def top_contributors(report: Dict[str, StreakInfo], n: int = 3) -> List[StreakInfo]:
+    """Return the top *n* contributors ranked by longest streak, then current streak.
+
+    Useful for highlighting standout contributors in a summary digest without
+    rendering the full streak section.
+    """
+    ranked = sorted(
+        report.values(),
+        key=lambda s: (s.longest_streak, s.current_streak),
+        reverse=True,
+    )
+    return ranked[:n]
 
 
 def format_streak_section(report: Dict[str, StreakInfo]) -> str:
