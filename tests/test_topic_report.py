@@ -38,6 +38,14 @@ def test_empty_subject_returns_other():
 def test_refactor_prefix():
     assert _extract_prefix("refactor: extract helper") == "refactor"
 
+def test_prefix_with_whitespace_after_colon():
+    """Prefix should be extracted even when there's extra spacing."""
+    assert _extract_prefix("feat:  add something") == "feat"
+
+def test_prefix_no_description_after_colon():
+    """A subject with just a prefix and colon but no description."""
+    assert _extract_prefix("fix:") == "fix"
+
 
 # --- build_topic_map ---
 
@@ -73,6 +81,18 @@ def test_other_bucket_for_unknown():
     commits = [FakeCommit(subject="random message")]
     result = build_topic_map(commits)
     assert "other" in result
+
+def test_bucket_count_matches_total_commits():
+    """Sum of all bucket counts should equal the number of commits passed in."""
+    commits = [
+        FakeCommit(subject="feat: a"),
+        FakeCommit(subject="fix: b"),
+        FakeCommit(subject="random"),
+        FakeCommit(subject="chore: c"),
+    ]
+    result = build_topic_map(commits)
+    total = sum(bucket.count for bucket in result.values())
+    assert total == len(commits)
 
 
 # --- format_topic_report ---
