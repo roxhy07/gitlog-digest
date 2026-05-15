@@ -24,52 +24,57 @@ def _make_parser() -> argparse.ArgumentParser:
     return parser
 
 
+def _parse(*args: str) -> argparse.Namespace:
+    """Helper to parse CLI args without repeating _make_parser().parse_args()."""
+    return _make_parser().parse_args(list(args))
+
+
 # --- add_refactor_flag ---
 
 def test_flag_default_false():
-    args = _make_parser().parse_args([])
+    args = _parse()
     assert args.refactor is False
 
 
 def test_flag_enabled():
-    args = _make_parser().parse_args(["--refactor"])
+    args = _parse("--refactor")
     assert args.refactor is True
 
 
 def test_top_refactorers_default():
-    args = _make_parser().parse_args([])
+    args = _parse()
     assert args.top_refactorers == 5
 
 
 def test_top_refactorers_custom():
-    args = _make_parser().parse_args(["--top-refactorers", "3"])
+    args = _parse("--top-refactorers", "3")
     assert args.top_refactorers == 3
 
 
 # --- maybe_render_refactor ---
 
 def test_returns_empty_when_flag_off():
-    args = _make_parser().parse_args([])
+    args = _parse()
     commits = [FakeCommit("alice", "refactor: something")]
     assert maybe_render_refactor(args, commits) == ""
 
 
 def test_returns_content_when_flag_on():
-    args = _make_parser().parse_args(["--refactor"])
+    args = _parse("--refactor")
     commits = [FakeCommit("alice", "refactor: something")]
     result = maybe_render_refactor(args, commits)
     assert "alice" in result
 
 
 def test_returns_empty_string_for_no_refactor_commits():
-    args = _make_parser().parse_args(["--refactor"])
+    args = _parse("--refactor")
     commits = [FakeCommit("alice", "add new feature")]
     result = maybe_render_refactor(args, commits)
     assert result == ""
 
 
 def test_respects_top_n_arg():
-    args = _make_parser().parse_args(["--refactor", "--top-refactorers", "1"])
+    args = _parse("--refactor", "--top-refactorers", "1")
     commits = [
         FakeCommit("alice", "refactor A"),
         FakeCommit("alice", "refactor B"),
