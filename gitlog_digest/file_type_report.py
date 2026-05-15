@@ -72,3 +72,15 @@ def format_file_type_section(entries: List[FileTypeEntry], bar_width: int = 20) 
             f"{entry.commit_count} commit(s)"
         )
     return "\n".join(lines)
+
+
+def author_extension_matrix(mapping: Dict[str, FileTypeEntry]) -> Dict[str, List[str]]:
+    """Return a mapping of author -> list of extensions they touched.
+
+    Useful for a quick overview of which languages each contributor worked in.
+    """
+    matrix: Dict[str, List[str]] = defaultdict(list)
+    for ext, entry in sorted(mapping.items()):
+        for author in entry.authors:
+            matrix[author].append(ext)
+    return dict(matrix)
