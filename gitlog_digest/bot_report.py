@@ -54,12 +54,19 @@ def top_bots(entries: dict[str, BotEntry], n: int = 5) -> List[BotEntry]:
     return sorted(entries.values(), key=lambda e: e.commit_count, reverse=True)[:n]
 
 
+def total_bot_commits(entries: dict[str, BotEntry]) -> int:
+    """Return the total number of commits across all bot entries."""
+    return sum(e.commit_count for e in entries.values())
+
+
 def format_bot_section(entries: dict[str, BotEntry], n: int = 5) -> str:
     """Render a plain-text summary of the top bot contributors."""
     bots = top_bots(entries, n)
     if not bots:
         return ""
+    total = total_bot_commits(entries)
     lines = ["Bot / Automated Commits", "-" * 24]
+    lines.append(f"  Total bot commits: {total} across {len(entries)} author(s)")
     for entry in bots:
         lines.append(f"  {entry.author}: {entry.commit_count} commit(s)")
         for subj in entry.subjects[:3]:
